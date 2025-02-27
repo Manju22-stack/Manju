@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60vh;
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+            text-align: center;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+            margin-top: 80px;
+        }
+        .hidden { display: none; }
+        .button {
+            background-color: #ff4081;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .button:hover { background-color: #e91e63; }
+        .section {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            max-width: 400px;
+            height: 100vh;
+            width: 100vh;
+           color: white  
+            border-box 1px solid #000;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(120deg, #926061, #fad0c4);
+        
+        }
+        .active { display: flex; }
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .puzzle-piece {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            border: 1px solid #000;
+            cursor: pointer;
+            user-select: none;
+        }
+        .empty {
+            background-color: transparent;
+            border: none;
+            cursor: default;
+        }
+        .image-gallery img {
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: transform 0.3s;
+            margin-bottom: 10px;
+        }
+        #name{
+          
+           font-weight:lighter;
+            height: 35px;
+            width: 220px;
+            border-radius: 5px;
+            border: 1px solid wheat;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: larger;
+        } 
+        #age{
+           font-weight: lighter;
+            height: 35px;
+            width: 220px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid wheat;
+            margin-top: 10px;
+            font-size: larger;
+        }
+        #memory{
+            height: 100px;
+            width: 400px;
+            border-radius: 5px;
+            font-size: large;
+        }
+
+        .image-gallery img:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <!-- Page 1: User Details -->
+    <div id="namePage" class="section active">
+        <h1>Enter Your Details</h1>
+        <input type="text" id="name" placeholder="Enter your name">
+        <input type="text" id="age" placeholder="Enter your age">
+        <button class="button" onclick="goToPage('memoryPage')">Next</button>
+    </div>
+
+    <!-- Page 2: Memory Input -->
+    <div id="memoryPage" class="section">
+        <h1>Share a Beautiful Memory</h1>
+        <textarea id="memory" placeholder="Write a memory (max 250 characters)" maxlength="250"></textarea>
+        <br>
+        <button class="button" onclick="goToPage('puzzlePage')">Next</button>
+    </div>
+
+    <!-- Page 3: Puzzle -->
+    <div id="puzzlePage" class="section">
+        <h1>Solve the Puzzle</h1>
+        <p>Click adjacent pieces to move them and solve the puzzle.</p>
+        <div class="puzzle-container" id="puzzleBoard"></div>
+        <button class="button" onclick="checkPuzzle()">Check</button>
+    </div>
+
+    <!-- Page 4: Birthday Surprise -->
+    <div id="galleryPage" class="section">
+        <h1>🎉 Happy Birthday! 🎉</h1>
+        <div class="image-gallery" id="gallery">
+            <img src="image1.jpg" alt="Image 1" onclick="showNextImage()">
+        </div>
+    </div>
+
+    <script>
+        let images = ["image1.jpg", "image2.jpg", "image3.jpg", "image4.jpg","p1.jpg","p2.jpg","p3.jpg","p4.jpg","p5.jpg","p6.jpg"];
+        let currentIndex = 0;
+
+        function goToPage(pageId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function showNextImage() {
+            currentIndex = (currentIndex + 1) % images.length;
+            document.getElementById('gallery').innerHTML = `<img src="${images[currentIndex]}" alt="Image ${currentIndex + 1}" onclick="showNextImage()">`;
+        }
+
+        // Puzzle Implementation
+        let correctOrder = [1, 2, 3, 4, 5, 6, 7, 8, null];  // Null represents the empty space
+        let shuffledOrder = [...correctOrder].sort(() => Math.random() - 0.5);
+
+        function renderPuzzle() {
+            let puzzleBoard = document.getElementById('puzzleBoard');
+            puzzleBoard.innerHTML = '';
+            shuffledOrder.forEach((num, index) => {
+                let div = document.createElement('div');
+                div.className = 'puzzle-piece';
+                if (num === null) {
+                    div.classList.add('empty');
+                    div.innerText = '';
+                } else {
+                    div.innerText = num;
+                    div.onclick = () => swapPiece(index);
+                }
+                puzzleBoard.appendChild(div);
+            });
+        }
+
+        function swapPiece(index) {
+            let emptyIndex = shuffledOrder.indexOf(null);
+            let row = Math.floor(index / 3);
+            let col = index % 3;
+            let emptyRow = Math.floor(emptyIndex / 3);
+            let emptyCol = emptyIndex % 3;
+
+            if ((Math.abs(row - emptyRow) === 1 && col === emptyCol) || 
+                (Math.abs(col - emptyCol) === 1 && row === emptyRow)) {
+                [shuffledOrder[index], shuffledOrder[emptyIndex]] = [shuffledOrder[emptyIndex], shuffledOrder[index]];
+                renderPuzzle();
+            }
+        }
+
+        function checkPuzzle() {
+            if (JSON.stringify(shuffledOrder) === JSON.stringify(correctOrder)) {
+                alert("🎉 Puzzle solved! Moving to the birthday surprise!");
+                goToPage('galleryPage');
+            } else {
+                alert("❌ Not correct yet, keep trying!");
+            }
+        }
+
+        renderPuzzle();
+    </script>
+</body>
+</html>
